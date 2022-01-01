@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="appengine-python-standard",
-    version="1.0.0",
+    name="appengine-python-standard-tbafork",
+    version="0.4.0dev2",
     author="Google LLC",
     description="Google App Engine services SDK for Python 3",
     long_description=long_description,
