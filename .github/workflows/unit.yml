@@ -4,9 +4,9 @@ name: Python Unit CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, tba-fork ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, tba-fork ]
 
 jobs:
   test:
