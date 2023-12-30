@@ -1819,7 +1819,7 @@ class TextProperty(BlobProperty):
         raise datastore_errors.BadValueError('Expected valid UTF-8, got %r' %
                                              (value,))
     elif isinstance(value, six.text_type):
-      length = len(value.encode('utf-8'))
+      length = len(value.encode('utf-8', 'surrogatepass'))
     else:
       raise datastore_errors.BadValueError('Expected string, got %r' %
                                            (value,))
@@ -1830,12 +1830,12 @@ class TextProperty(BlobProperty):
 
   def _to_base_type(self, value):
     if isinstance(value, six.text_type):
-      return value.encode('utf-8')
+      return value.encode('utf-8', 'surrogatepass')
 
   def _from_base_type(self, value):
     if isinstance(value, six.binary_type):
       try:
-        return six.text_type(value, 'utf-8')
+        return six.text_type(value, 'utf-8', 'surrogatepass')
       except UnicodeDecodeError:
 
 
@@ -3043,7 +3043,16 @@ class Model(six.with_metaclass(MetaModel, _NotEqualMixin)):
   def __getstate__(self):
     return self._to_pb().SerializeToString()
 
+  def _py2_compat_encode(self, py2_serialized_pb):
+    return bytes(py2_serialized_pb, 'latin1')
+
   def __setstate__(self, serialized_pb):
+    if isinstance(serialized_pb, str):
+      # If 'serialized_pb' was written by a python27 clone.
+      logging.warning(
+          'Assuming python2 pickled state, converting to python3 type.'
+      )
+      serialized_pb = self._py2_compat_encode(serialized_pb)
     pb = entity_pb2.EntityProto.FromString(serialized_pb)
     self.__init__()
     self.__class__._from_pb(pb, set_key=False, ent=self)
